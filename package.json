@@ -2,10 +2,11 @@
   "name": "restaurant-billing-system-backend",
   "version": "1.0.0",
   "description": "Backend for Restaurant Billing System",
-  "main": "src/index.js",
+  "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "dev": "nodemon index.js"
+    "dev": "nodemon index.js",
+    "build": "echo 'No build step required'"
   },
   "keywords": [],
   "author": "",

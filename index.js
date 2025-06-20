@@ -22,7 +22,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Serve uploaded files
-app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Import routes
 const authRoutes = require('./routes/auth.routes');
@@ -44,6 +44,15 @@ app.get('/api/seed', async (req, res) => {
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
+});
+
+// Health check endpoint for Vercel
+app.get('/api/health', (req, res) => {
+  res.json({ 
+    status: 'OK', 
+    message: 'Server is running',
+    timestamp: new Date().toISOString()
+  });
 });
 
 // Error handling middleware
@@ -75,20 +84,21 @@ const mongooseOptions = {
 mongoose.connect(MONGODB_URI, mongooseOptions)
   .then(() => {
     console.log('Connected to MongoDB');
-    // Start server
-    app.listen(PORT, () => {
-      console.log(`Server is running on port ${PORT}`);
-      console.log(`MongoDB URI: ${MONGODB_URI}`);
-    });
+    // Start server only if not on Vercel (Vercel handles this automatically)
+    if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
+      app.listen(PORT, () => {
+        console.log(`Server is running on port ${PORT}`);
+        console.log(`MongoDB URI: ${MONGODB_URI}`);
+      });
+    }
   })
   .catch((error) => {
     console.error('MongoDB connection error:', error);
     console.log('Please make sure MongoDB is installed and running locally');
-    process.exit(1);
+    if (process.env.NODE_ENV !== 'production') {
+      process.exit(1);
+    }
   }); 
-
-
-
 
 app.get('/api/categories', async (req, res) => {
   try {
@@ -107,3 +117,6 @@ app.get('/api/categories', async (req, res) => {
     });
   }
 });
+
+// Export for Vercel
+module.exports = app;
