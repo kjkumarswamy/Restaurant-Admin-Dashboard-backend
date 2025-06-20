@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const path = require('path');
-// const connectDB = require('../db/config');
+const connectDB = require('./config/db');
 const Category = require('./models/category.model');
 const runSeed = require('./seed');
 const orderRoutes = require('./routes/order');
@@ -13,8 +13,6 @@ dotenv.config();
 
 // Create Express app
 const app = express();
-
-// connectDB();
 
 // Middleware
 app.use(cors());
@@ -74,16 +72,9 @@ app.get('/api/db-uri', (req, res) => {
   res.json({ uri: MONGODB_URI, url: MONGODB_URI });
 });
 
-// MongoDB connection options
-const mongooseOptions = {
-  serverSelectionTimeoutMS: 5000,
-  socketTimeoutMS: 45000,
-};
-
-// Connect to MongoDB
-mongoose.connect(MONGODB_URI, mongooseOptions)
+// Connect to MongoDB using the new function
+connectDB(MONGODB_URI)
   .then(() => {
-    console.log('Connected to MongoDB');
     // Start server only if not on Vercel (Vercel handles this automatically)
     if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
       app.listen(PORT, () => {
@@ -93,12 +84,11 @@ mongoose.connect(MONGODB_URI, mongooseOptions)
     }
   })
   .catch((error) => {
-    console.error('MongoDB connection error:', error);
     console.log('Please make sure MongoDB is installed and running locally');
     if (process.env.NODE_ENV !== 'production') {
       process.exit(1);
     }
-  }); 
+  });
 
 app.get('/api/categories', async (req, res) => {
   try {
