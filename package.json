@@ -3,10 +3,15 @@
   "version": "1.0.0",
   "description": "Backend for Restaurant Billing System",
   "main": "index.js",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js",
-    "build": "echo 'No build step required'"
+    "build": "echo 'No build step required'",
+    "postinstall": "echo 'Post-install script completed'"
   },
   "keywords": [],
   "author": "",

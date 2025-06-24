@@ -62,7 +62,7 @@ exports.getAllCategories = async (req, res) => {
     const categories = await Category.find()
       .sort(sortOptions)
       .select('-__v');
-    console.log('Categories:', categories);
+      
     res.json({
       success: true,
       data: categories
