@@ -37,6 +37,7 @@ app.use('/api/menu', menuRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/orders', orderRoutes);
 
+// CONNECTION_URL = mongodb+srv://kumar_01:Prash_123@cluster0.mmowh7k.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
 // Seed endpoint
 app.get('/api/seed', async (req, res) => {
   try {
@@ -47,22 +48,12 @@ app.get('/api/seed', async (req, res) => {
   }
 });
 
-// Health check endpoint for Railway
+// Health check endpoint for Vercel
 app.get('/api/health', (req, res) => {
   res.json({ 
     status: 'OK', 
     message: 'Server is running',
-    timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV || 'development'
-  });
-});
-
-// Root endpoint
-app.get('/', (req, res) => {
-  res.json({ 
-    message: 'Restaurant Billing System API',
-    version: '1.0.0',
-    status: 'running'
+    timestamp: new Date().toISOString()
   });
 });
 
@@ -77,10 +68,10 @@ app.use((err, req, res, next) => {
 });
 
 // MongoDB connection with fallback URI and options
-const MONGODB_URI = process.env.CONNECTION_URL || process.env.MONGODB_URI;
+const MONGODB_URI = process.env.CONNECTION_URL;
 const PORT = process.env.PORT || 5000;
 
-// Check if the database is connected
+//check if the database is connected
 app.get('/api/db-uri', (req, res) => {
   res.json({ 
     uri: MONGODB_URI ? 'Set' : 'Not set', 
@@ -92,21 +83,20 @@ app.get('/api/db-uri', (req, res) => {
 // Initialize database connection
 async function initializeApp() {
   try {
-    if (MONGODB_URI) {
-      await connectDB(MONGODB_URI);
-    } else {
-      console.warn('No MongoDB URI provided. Please set CONNECTION_URL or MONGODB_URI environment variable.');
-    }
+    await connectDB(MONGODB_URI);
     
-    // Start server
-    app.listen(PORT, '0.0.0.0', () => {
-      console.log(`Server is running on port ${PORT}`);
-      console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
-      console.log(`MongoDB URI: ${MONGODB_URI ? 'Set' : 'Not set'}`);
-    });
+    // Start server only if not on Vercel (Vercel handles this automatically)
+    if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
+      app.listen(PORT, () => {
+        console.log(`Server is running on port ${PORT}`);
+        console.log(`MongoDB URI: ${MONGODB_URI ? 'Set' : 'Not set'}`);
+      });
+    }
   } catch (error) {
     console.error('Failed to initialize app:', error);
-    process.exit(1);
+    if (process.env.NODE_ENV !== 'production') {
+      process.exit(1);
+    }
   }
 }
 
@@ -130,4 +120,5 @@ app.get('/api/categories', async (req, res) => {
   }
 });
 
+// Export for Vercel
 module.exports = app;
